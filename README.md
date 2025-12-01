@@ -1,104 +1,76 @@
-#Geospatial PCA & Clustering Analysis
+# Interpolation Methods for Cu% (IDW, SK, OK)
+**Author:** Sibongile Tshabalala (2356121)  
+**Week 4 Homework**
 
-##Overview
+## Overview
+This project compares deterministic and geostatistical interpolation methods for a Copper (Cu%) dataset. Methods implemented include:
+- **Inverse Distance Weighting (IDW)**  
+- **Simple Kriging (SK)**  
+- **Ordinary Kriging (OK)**  
 
-This project performs dimensionality reduction and geospatial clustering using multispectral remote-sensing data. The workflow applies PCA to compress spectral features, uses K-Means clustering for land-cover segmentation, computes NDVI & NDWI indices, and visualizes spatial structure across coordinates using georeferenced grid mapping.
+The workflow covers data preprocessing, declustering, normal score transformation, variogram modeling, interpolation on a regular grid, and model validation using 5-fold cross-validation.
 
-##Tools & Libraries
+## Tools & Libraries
+- Python
+- Pandas, NumPy
+- Matplotlib, Seaborn
+- Scikit-learn
+- PyKrige (Ordinary Kriging)
+- GSTools (Simple Kriging)
+- scikit-gstat (Variogram analysis)
+- GeoPandas / Shapely (optional for spatial outputs)
+- SciPy
 
-Python
+## Project Workflow
 
-Pandas, NumPy
+### 1. Data Loading & Preprocessing
+- Loaded Cu% dataset (`CuMineBH.csv`) and standardized column names.
+- Filtered for relevant columns (Easting, Northing, Cu%) and removed missing values.
+- Visualized Cu% distribution via scatter plots.
 
-Matplotlib, Seaborn
+### 2. Declustering
+- Computed nearest-neighbor distances and suggested cell size for declustering.
+- Applied weights to correct spatial sampling bias.
+- Compared naive vs declustered Cu% statistics.
 
-Scikit-learn (PCA, KMeans, Silhouette Score)
+### 3. Normal Score Transformation (NST)
+- Transformed Cu% to normal scores to stabilize variance for kriging.
+- Generated forward/backward interpolation functions for back-transformation.
+- Verified transformation using QQ plots.
 
-Yellowbrick (Elbow method)
+### 4. Variogram Modeling
+- Calculated experimental variogram for normal scores.
+- Fitted spherical, exponential, and gaussian models; selected **spherical** as best fit.
+- Converted fitted model for use in GSTools and kriging methods.
 
-SciPy (linear assignment, contingency matrix)
+### 5. Interpolation Grid & Search Strategy
+- Created a regular grid (10 m spacing) covering data extent.
+- Defined search neighborhood: radius = 1.25 × variogram range, min 3 and max 16 neighbors.
 
-Optional: GeoPandas for geospatial export
+### 6. Interpolation Methods
+- **IDW**: Tested powers p = 1–5; p = 2 selected as best balance.
+- **Simple Kriging (SK)**: Applied on normal scores, back-transformed to Cu%.
+- **Ordinary Kriging (OK)**: Used local mean estimation, implemented via PyKrige.
 
-##Project Tasks
-###1. Data Loading & Cleaning
+### 7. Validation & Comparative Analysis
+- Conducted 5-fold cross-validation for IDW, SK, and OK.
+- Metrics computed: RMSE, MAE, R².
+- **Findings:** OK performed marginally better than SK and IDW.
 
-Imported CSV pixel data with spectral bands and coordinates.
+### 8. Results & Insights
+- IDW: Smooth at low powers, localized "bullseye" at high powers.
+- SK: Smooth maps, constrained to global mean; higher variance in sparse regions.
+- OK: Locally adaptive estimates; realistic variations; variance reflects sample density.
+- Conclusion: **Ordinary Kriging is the most reliable for this dataset**.
 
-Converted fields to numeric and handled null/missing values.
+### 9. Challenges & Future Improvements
+- Current model assumes isotropy; directional continuity not considered.
+- Improvements:
+  - Incorporate anisotropy in variogram modeling.
+  - Use larger datasets for better training and validation.
+  - Apply advanced kriging variants (e.g., universal kriging).
 
-###2. Vegetation & Water Index Computation
-
-Computed NDVI from NIR and Red bands.
-
-Computed NDWI from Green and NIR bands.
-
-Produced 2D raster-style index maps.
-
-###3. PCA Dimensionality Reduction
-
-Reduced 7 spectral bands to 3 components.
-
-Displayed scree plots and loadings.
-
-Preserved most of the statistical variance.
-
-###4. Clustering
-
-Selected optimal k using Elbow & Silhouette.
-
-Applied K-Means on:
-
-Original spectral data
-
-PCA-reduced data
-
-Compared internal cluster cohesion.
-
-###5. Spatial Visualization
-
-Reshaped flattened pixels back into 2D spatial grids.
-
-Generated maps for:
-
-PC1–PC3
-
-Original clustering
-
-PCA-aligned clustering
-
-PCA RGB composite
-
-NDVI and NDWI overlays
-
-###6. Statistical Interpretation
-
-Analyzed cluster sizes and group consistency.
-
-Used contingency metrics to align PCA clusters.
-
-##Summary of Findings
-
-PCA-based clustering produced more stable spatial grouping.
-
-Original spectral clustering showed finer micro-scale distinctions.
-
-NDVI & NDWI overlays supported water and vegetation interpretation.
-
-##Challenges & Improvements
-
-PCA may smooth out small-scale local anomalies.
-
-Cluster selection depends partly on geoscientific context.
-
-##Future enhancements:
-
-Add terrain & soil layers
-
-Experiment with DBSCAN / Gaussian Mixtures
-
-Use time-series satellite data
-
-##Conclusion
-
-This project demonstrates a professional geospatial ML workflow integrating spectral analysis, PCA-based feature compression, and unsupervised clustering. It highlights technical skill in remote sensing analytics, geostatistical modelling, and geospatial engineering.
+## Usage
+1. Install dependencies:
+```bash
+pip install pykrige gstools scikit-gstat geopandas matplotlib seaborn pandas numpy scikit-learn
