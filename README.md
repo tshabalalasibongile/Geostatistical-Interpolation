@@ -1,6 +1,4 @@
 # Interpolation Methods for Cu% (IDW, SK, OK)
-**Author:** Sibongile Tshabalala (2356121)  
-**Week 4 Homework**
 
 ## Overview
 This project compares deterministic and geostatistical interpolation methods for a Copper (Cu%) dataset. Methods implemented include:
